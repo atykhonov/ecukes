@@ -59,7 +59,7 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "^some \"\\([^\"]+\\)\"$"
+      (Given "^some 'symbol$"
         (lambda (arg)
 
           ))
@@ -78,7 +78,7 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "^some \"\\([^\"]+\\)\" and some \"\\([^\"]+\\)\"$"
+      (Given "^some 'symbol and some 'symbol$"
         (lambda (arg-1 arg-2)
 
           ))

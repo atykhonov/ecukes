@@ -27,11 +27,11 @@ optional, but is conventionally included."
 
 (defstruct ecukes-step
   "A step is some kind of action."
-  name head body arg type err status)
+  name head body arg type err status params)
 
 (defstruct ecukes-step-def
   "A step definition."
-  regex fn doc file)
+  body fn doc file)
 
 (defun ecukes-step-file-name (step &optional relative)
   "Return the file in which STEP is defined.

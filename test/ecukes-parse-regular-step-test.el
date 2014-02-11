@@ -4,7 +4,7 @@
   "Should parse given step."
   (with-parse-step
    "given"
-   (lambda (name head body type arg)
+   (lambda (name head body type arg params)
      (should (eq type 'regular))
      (should (equal name "Given a known state"))
      (should (equal body "a known state")))))
@@ -13,7 +13,7 @@
   "Should parse when step."
   (with-parse-step
    "when"
-   (lambda (name head body type arg)
+   (lambda (name head body type arg params)
      (should (eq type 'regular))
      (should (equal name "When the key action"))
      (should (equal body "the key action")))))
@@ -22,7 +22,7 @@
   "Should parse then step."
   (with-parse-step
    "then"
-   (lambda (name head body type arg)
+   (lambda (name head body type arg params)
      (should (eq type 'regular))
      (should (equal name "Then observe outcomes"))
      (should (equal body "observe outcomes")))))
@@ -31,7 +31,7 @@
   "Should parse and step."
   (with-parse-step
    "and"
-   (lambda (name head body type arg)
+   (lambda (name head body type arg params)
      (should (eq type 'regular))
      (should (equal name "And another key action"))
      (should (equal body "another key action")))))
@@ -40,7 +40,17 @@
   "Should parse but step."
   (with-parse-step
    "but"
-   (lambda (name head body type arg)
+   (lambda (name head body type arg params)
      (should (eq type 'regular))
      (should (eq type 'regular))
      (should (equal name "But observe outcomes")))))
+
+(ert-deftest parse-regular-step-with-parameters ()
+  "Should parse step with parameters."
+  (with-parse-step
+   "body-with-parameters"
+   (lambda (name head body type arg params)
+     (should (eq type 'regular))
+     (should (eq type 'regular))
+     (should (equal name "But 'simply 'observe outcomes"))
+     (should (equal body ":param :param outcomes")))))

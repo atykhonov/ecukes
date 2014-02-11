@@ -4,17 +4,17 @@
   "Should define step."
   (with-steps
    (let ((load-file-name "DUMMY/FILE/NAME.el"))
-     (Given "^a known state$" 'ignore))
+     (Given "a known state" 'ignore))
    (should
     (equal
-     (make-ecukes-step-def :regex "^a known state$" :fn 'ignore
+     (make-ecukes-step-def :body "a known state" :fn 'ignore
                            :file "DUMMY/FILE/NAME.el")
      (car ecukes-steps-definitions)))))
 
 (ert-deftest steps-defined-with-doc ()
   "Should record docstring if given."
   (with-steps
-   (Given "^a known state$"
+   (Given "a known state"
      "This step does what."
      'ignore)
    (should
@@ -24,8 +24,8 @@
 (ert-deftest steps-define-same-step-twice ()
   "Should not define same step twice."
   (with-steps
-   (Given "^a known state$" 'ignore)
-   (Given "^a known state$" 'ignore)
+   (Given "a known state" 'ignore)
+   (Given "a known state" 'ignore)
    (should
     (equal (length ecukes-steps-definitions) 1))))
 

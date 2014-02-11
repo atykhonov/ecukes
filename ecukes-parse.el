@@ -50,6 +50,7 @@
     (let* ((tags)
            (intro (ecukes-parse-intro))
            (background (ecukes-parse-background))
+           ;; (test (message "Test POINT!!!"))
            (outlines (ecukes-parse-outlines))
            (scenarios (append (ecukes-parse-scenarios) (-mapcat 'ecukes-generate-outlined-scenarios outlines))))
       (goto-char (point-min))
@@ -197,7 +198,9 @@
          (matches (s-match ecukes-parse-step-re name))
          (head (nth 1 matches))
          (body (nth 2 matches))
+         (parsed-body)
          (arg)
+         (params)
          (type))
     (cond
      ((ecukes-parse-py-string-step-p)
@@ -206,8 +209,115 @@
      ((ecukes-parse-table-step-p)
       (setq arg (ecukes-parse-table-step))
       (setq type 'table))
-     (t (setq type 'regular)))
-    (make-ecukes-step :name name :head head :body body :type type :arg arg)))
+     (t (setq type 'regular)
+        (setq parsed-body (ecukes-parse-body body))
+        (setq body (car parsed-body))
+        (setq params (cadr parsed-body))))
+    (make-ecukes-step :name name :head head :body body 
+                      :type type :arg arg :params params)))
+
+(defun ecukes-char-at-point ()
+  (buffer-substring-no-properties (point) (+ (point) 1)))
+
+(defun ecukes-parse-body-find-unescaped-quote (quote)
+  (let ((quote-point nil)
+        (continue t)
+        (continue-looking t)
+        (escaped-quote nil))
+    (while (and continue
+                (setq quote-point
+                      (search-forward quote (point-max) t)))
+      (setq escaped-quote nil)
+      (when (> (point) 2)
+        (backward-char 2)
+        (while (and continue-looking 
+                    (equal (ecukes-char-at-point) "\\"))
+          (if (null escaped-quote)
+              (setq escaped-quote t)
+            (setq escaped-quote nil))
+          (if (> (point) 1)
+              (backward-char 1)
+            (setq continue-looking nil))))
+      (if (null escaped-quote)
+          (setq continue nil)
+        (progn
+          (goto-char quote-point)
+          (setq quote-point nil))))
+    (when quote-point
+      (- quote-point 1))))
+
+(defun ecukes-parse-body-next-unescaped-single-quote ()
+  (ecukes-parse-body-find-unescaped-quote "'"))
+
+(defun ecukes-parse-body-next-unescaped-double-quote ()
+  (ecukes-parse-body-find-unescaped-quote "\""))
+
+(defun ecukes-parse-body-next-unescaped-quote ()
+  (let ((curr-point (point))
+        (double-quote-pos nil)
+        (single-quote-pos nil))
+    (setq double-quote-pos
+         (ecukes-parse-body-next-unescaped-double-quote))
+    (goto-char curr-point)
+    (setq single-quote-pos
+         (ecukes-parse-body-next-unescaped-single-quote))
+    (if (and (not (null double-quote-pos))
+             (not (null single-quote-pos)))
+        (if (< double-quote-pos single-quote-pos)
+          double-quote-pos
+          single-quote-pos)
+      (if (not (null double-quote-pos))
+          double-quote-pos
+        (when (not (null single-quote-pos))
+          single-quote-pos)))))
+
+(defun ecukes-parse-body (body)
+  (let ((parameters '())
+        (continue t)
+        (curr-point nil)
+        (quote-point nil))
+    (with-temp-buffer
+      (insert body)
+      (goto-char (point-min))
+      (setq curr-point (point))
+      (while (setq quote-point
+                   (ecukes-parse-body-next-unescaped-quote))
+        (goto-char quote-point)
+        (if (equal (ecukes-char-at-point) "'")
+            (let* ((symbol-end-point
+                    (search-forward " " (point-max) t)))
+              (if (null symbol-end-point)
+                  (setq symbol-end-point
+                        (point-max))
+                (setq symbol-end-point
+                      (- symbol-end-point 1)))
+              (setq symbol-content
+                    (buffer-substring-no-properties
+                     quote-point
+                     symbol-end-point))
+              (add-to-list 'parameters
+                           (substring symbol-content 1) t)
+              (goto-char quote-point)
+              (delete-forward-char (length symbol-content))
+              (insert ":param"))
+          (when (equal (ecukes-char-at-point) "\"")
+            (let ((start-dbl-quote quote-point)
+                  (end-dbl-quote nil)
+                  (string-content ""))
+              (goto-char (+ start-dbl-quote 1))
+              (setq end-dbl-quote
+                    (ecukes-parse-body-next-unescaped-double-quote))
+              (setq string-content
+                    (buffer-substring-no-properties
+                     start-dbl-quote
+                     end-dbl-quote))
+              (add-to-list 'parameters
+                           (substring string-content 1)
+                           t)
+              (goto-char start-dbl-quote)
+              (delete-forward-char (+ (length string-content) 1))
+              (insert ":param")))))
+      (list (buffer-string) parameters))))
 
 (defun ecukes-parse-table-step-p ()
   "Check if step is a table step or not."
