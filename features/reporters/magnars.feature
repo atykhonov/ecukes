@@ -3,25 +3,25 @@ Feature: Magnars
   Background:
     Given step definition:
       """
-      (Given "^failure$"
+      (Given "failure"
        (lambda () (error "failure")))
 
-      (Given "^huge failure$"
+      (Given "huge failure"
        (lambda () (error "huge\nfailure")))
 
-      (Given "^a failing table:$"
+      (Given "a failing table:"
        (lambda (table) (error "failing table")))
 
-      (Given "^a successful table:$"
+      (Given "a successful table:"
        (lambda (table) ))
 
-      (Given "^a failing py string:$"
+      (Given "a failing py string:"
        (lambda (py-string) (error "failing py string")))
 
-      (Given "^a successful py string:$"
+      (Given "a successful py string:"
        (lambda (py-string) ))
 
-      (Given "^success$"
+      (Given "success"
        (lambda ()))
       """
 

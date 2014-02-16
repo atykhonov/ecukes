@@ -1,5 +1,10 @@
 (require 'ecukes-steps)
 
+(defun with-ecukes-steps-format-step (body args expected-body)
+  (should
+   (equal (ecukes-steps-format-step body args)
+          expected-body)))
+
 (ert-deftest steps-define-step ()
   "Should define step."
   (with-steps
@@ -32,30 +37,30 @@
 (ert-deftest steps-call-step-no-arguments ()
   "Should call step with no arguments."
   (with-steps
-   (Given "^a known state$" (lambda () "x"))
+   (Given "a known state" (lambda () "x"))
    (should (equal (Given "a known state") "x"))))
 
 (ert-deftest steps-call-step-single-argument ()
   "Should call step with single argument."
   (with-steps
-   (Given "^a \\(.+\\) state$" 'identity)
-   (should (equal (Given "a %s state" "known") "known"))))
+   (Given "a :arg-1 state" 'identity)
+   (should (equal (Given "a 'known state") "known"))))
 
 (ert-deftest steps-call-step-multiple-arguments ()
   "Should call step with multiple arguments."
   (with-steps
-   (Given "^state \\(.+\\) and \\(.+\\)$"
+   (Given "state :arg-1 and :arg-2"
           (lambda (state-1 state-2)
             (format "%s-%s" state-1 state-2)))
-   (should (equal (Given "state %s and %s" "known" "unknown") "known-unknown"))))
+   (should (equal (Given "state :arg-1 and :arg-2" "known" "unknown") "known-unknown"))))
 
 (ert-deftest steps-call-step-line-arguments ()
   "Should call step with inline arguments."
   (with-steps
-   (Given "^state \\(.+\\) and \\(.+\\)$"
+   (Given "state :arg-1 and :arg-2"
           (lambda (state-1 state-2)
             (format "%s-%s" state-1 state-2)))
-   (should (equal (Given "state known and unknown") "known-unknown"))))
+   (should (equal (Given "state 'known and 'unknown") "known-unknown"))))
 
 (ert-deftest steps-undefined-no-arguments ()
   "Should error when not defined, no arguments."
@@ -102,8 +107,8 @@
 (ert-deftest steps-args-without-quotes ()
   "Should return args when multiple (unquoted) args."
   (with-steps
-   (Given "^state \\(.+\\) and \\(.+\\)$" 'ignore)
-   (let ((step (mock-step "Given state known and unknown")))
+   (Given "state :arg-1 and :arg-2" 'ignore)
+   (let ((step (mock-step "Given state 'known and 'unknown")))
      (should (equal (ecukes-steps-args step) (list "known" "unknown"))))))
 
 (ert-deftest steps-args-not-defined-no-arg ()
@@ -117,3 +122,27 @@
   (with-steps
    (let ((step (mock-step "Given state \"known\" and \"unknown\"")))
      (should (equal (ecukes-steps-args step) (list "known" "unknown"))))))
+
+(ert-deftest steps-format-step-single-argument ()
+  (with-ecukes-steps-format-step
+   "test :param rest"
+   (list "my-param")
+   "test \"my-param\" rest"))
+
+(ert-deftest steps-format-step-several-arguments ()
+  (with-ecukes-steps-format-step
+   "test :param best :param rest :param guest"
+   (list "my-param" "next-param" "guest-param")
+   "test \"my-param\" best \"next-param\" rest \"guest-param\" guest"))
+
+(ert-deftest steps-format-step-argument-at-the-beginning ()
+  (with-ecukes-steps-format-step
+   ":param best"
+   (list "my-param")
+   "\"my-param\" best"))
+
+(ert-deftest steps-format-step-argument-at-the-end ()
+  (with-ecukes-steps-format-step
+   "test :param"
+   (list "my-param")
+   "test \"my-param\""))

@@ -11,7 +11,7 @@ Feature: Lexical binding
     Given step definition:
       """
       ;;; -*- lexical-binding: t; -*-
-      (Given "^no arguments$"
+      (Given "no arguments"
         (lambda () (print "foo")))
       """
     When I run ecukes "features/lexical-binding.feature --reporter dot"

@@ -192,9 +192,7 @@
   (let (success)
     (condition-case err
         (let* ((body (ecukes-step-body step))
-               (arg (ecukes-step-arg step))
-               (args (ecukes-steps-args step))
-               (args (if arg (append args (list arg)) args))
+               (args (ecukes-step-args step))
                (step-def (ecukes-steps-find body))
                (fn (ecukes-step-def-fn step-def))
                (fn-args-count

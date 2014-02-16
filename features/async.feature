@@ -7,11 +7,11 @@ Feature: Async
       """
       Feature: Sleep for
         Scenario: Ten seconds
-          Given I sleep for "1" second
+          Given I sleep for '1 second
       """
     Given step definition:
       """
-      (Given "^I sleep for \"\\([0-9]+\\)\" seconds?$"
+      (Given "I sleep for :arg-1 second"
         (lambda (seconds callback)
           (sleep-for (string-to-number seconds))
           (funcall callback)))
@@ -34,7 +34,7 @@ Feature: Async
       """
     And step definition:
       """
-      (Given "^I sleep for \"\\([0-9]+\\)\" seconds?$"
+      (Given "I sleep for :arg-1 second"
         (lambda (seconds callback)
           (funcall callback)))
       """
@@ -53,11 +53,11 @@ Feature: Async
       """
       Feature: Sleep for
         Scenario: Ten seconds
-          Given I sleep for "1" second
+          Given I sleep for '10 seconds
       """
     Given step definition:
       """
-      (Given "^I sleep for \"\\([0-9]+\\)\" seconds?$"
+      (Given "I sleep for :arg-1 seconds"
         (lambda (seconds callback)
           ;; not callbacked
           ))
@@ -68,7 +68,7 @@ Feature: Async
       .
 
         Scenario: Ten seconds
-          Given I sleep for "1" second
+          Given I sleep for '10 seconds
             Did not callback async step within 1 seconds
 
       1 scenarios (1 failed, 0 passed)

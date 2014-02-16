@@ -27,7 +27,7 @@ optional, but is conventionally included."
 
 (defstruct ecukes-step
   "A step is some kind of action."
-  name head body arg type err status params)
+  name head body args type err status)
 
 (defstruct ecukes-step-def
   "A step definition."

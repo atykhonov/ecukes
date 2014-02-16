@@ -15,14 +15,15 @@
 
 (defun mock-step (name &rest overrides)
   (let* ((matches (s-match ecukes-parse-step-re name))
+         (parsed-body (ecukes-parse-body (nth 2 matches)))
          (name (or (plist-get overrides :name) name))
          (head (or (plist-get overrides :head) (nth 1 matches)))
-         (body (or (plist-get overrides :body) (nth 2 matches)))
+         (body (or (plist-get overrides :body) (car parsed-body)))
          (type (or (plist-get overrides :type) 'regular))
-         (arg (plist-get overrides :arg))
+         (args (or (plist-get overrides :args) (cadr parsed-body)))
          (err (plist-get overrides :err))
          (properties
-          (list :name name :head head :body body :arg arg :type type :err err)))
+          (list :name name :head head :body body :args args :type type :err err)))
     (apply 'make-ecukes-step properties)))
 
 (defun with-parse-step (name fn)
@@ -36,9 +37,8 @@
          (head (ecukes-step-head step))
          (body (ecukes-step-body step))
          (type (ecukes-step-type step))
-         (arg (ecukes-step-arg step))
-         (params (ecukes-step-params step)))
-    (funcall fn name head body type arg params)))
+         (args (ecukes-step-args step)))
+    (funcall fn name head body type args)))
 
 (defun with-parse-scenario (name fn)
   (let* ((feature-file (fixture-file-path "scenario" name))

@@ -812,28 +812,15 @@
             (funcall callback))))
    (should (ecukes-run-step (make-ecukes-step)))))
 
-(ert-deftest ecukes-run-test/run-step-async-callbacked-with-arg ()
+(ert-deftest ecukes-run-test/run-step-async-callbacked-with-args ()
   (with-mock
-   (stub ecukes-steps-args)
    (stub ecukes-steps-find =>
          (make-ecukes-step-def
           :fn
-          (lambda (arg callback)
-            (should (eq arg 'arg))
-            (funcall callback))))
-   (should (ecukes-run-step (make-ecukes-step :arg 'arg)))))
-
-(ert-deftest ecukes-run-test/run-step-async-callbacked-with-arg-and-args ()
-  (with-mock
-   (stub ecukes-steps-args => '(arg-1))
-   (stub ecukes-steps-find =>
-         (make-ecukes-step-def
-          :fn
-          (lambda (arg-1 arg-2 callback)
+          (lambda (arg-1 callback)
             (should (eq arg-1 'arg-1))
-            (should (eq arg-2 'arg-2))
             (funcall callback))))
-   (should (ecukes-run-step (make-ecukes-step :arg 'arg-2)))))
+   (should (ecukes-run-step (make-ecukes-step :args '(arg-1))))))
 
 (ert-deftest ecukes-run-test/run-step-async-with-timeout ()
   (with-mock

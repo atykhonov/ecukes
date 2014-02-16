@@ -8,7 +8,7 @@ Feature: Error Log
   Scenario: Single error
     Given step definition:
       """
-      (Given "^zero division$"
+      (Given "zero division"
        (lambda () (/ 1 0)))
       """
     Given feature "math":

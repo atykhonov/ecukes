@@ -13,7 +13,7 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "^a missing step$"
+      (Given "a missing step"
         (lambda ()
 
           ))
@@ -35,12 +35,12 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "^a missing step$"
+      (Given "a missing step"
         (lambda ()
 
           ))
 
-      (Given "^another missing step$"
+      (Given "another missing step"
         (lambda ()
 
           ))
@@ -59,7 +59,7 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "^some 'symbol$"
+      (Given "some :arg-1"
         (lambda (arg)
 
           ))
@@ -78,7 +78,7 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "^some 'symbol and some 'symbol$"
+      (Given "some :arg-1 and some :arg-2"
         (lambda (arg-1 arg-2)
 
           ))

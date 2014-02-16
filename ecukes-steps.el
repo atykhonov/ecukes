@@ -66,9 +66,39 @@ When *calling* a step, argument takes the following form:
      'ecukes-steps-definitions
      (make-ecukes-step-def :body body :fn fn :doc doc :file file))))
 
+(defun ecukes-steps-format-step (body args)
+  "Format step."
+  (let ((continue t)
+        (curr-point nil)
+        (colon-point nil))
+    (with-temp-buffer
+      (insert body)
+      (goto-char (point-min))
+      (setq curr-point (point))
+      (while (setq colon-point
+                   (ecukes-parse-body-next-unescaped-colon))
+        (goto-char colon-point)
+        (let ((colon-end-point
+               (search-forward " " (point-max) t)))
+          (if (null colon-end-point)
+              (setq colon-end-point
+                    (point-max))
+            (setq colon-end-point
+                  (- colon-end-point 1)))
+          (goto-char colon-point)
+          (delete-forward-char (- colon-end-point colon-point))
+          (insert "\"" (car args) "\"")
+          (setq args (cdr args))))
+      (buffer-string))))
+
 (defun ecukes-steps-call (body args)
   "Call step."
-  (let* ((query (apply 'format (cons body args)))
+  (let* ((parsed-body (ecukes-parse-body body))
+         (args (if (equal body (car parsed-body))
+                   args
+                 (cadr parsed-body)))
+         (body (car parsed-body))
+         (query (apply 'format (cons body args)))
          (step-def (ecukes-steps-find query)))
     (if step-def
         (apply (ecukes-step-def-fn step-def)
@@ -87,18 +117,12 @@ When *calling* a step, argument takes the following form:
   "Find step by name."
   (-first
    (lambda (step-def)
-     (s-matches? (ecukes-step-def-body step-def) name))
+     (equal (ecukes-step-def-body step-def) name))
    ecukes-steps-definitions))
 
 (defun ecukes-steps-args (step)
   "Return args from step BODY."
-  (let* ((body (ecukes-step-body step))
-         (step-def (ecukes-steps-find body)))
-    (if step-def
-        (cdr (s-match (ecukes-step-def-body step-def) body))
-      (loop for sub on (cdr (split-string body "\""))
-            by (function cddr)
-            collect (car sub)))))
+  (ecukes-step-args step))
 
 (provide 'ecukes-steps)
 

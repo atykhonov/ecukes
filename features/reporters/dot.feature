@@ -3,22 +3,22 @@ Feature: Dot
   Background:
     Given step definition:
       """
-      (Given "^failure$"
+      (Given "failure"
        (lambda () (error "failure")))
 
-      (Given "^a failing table:$"
+      (Given "a failing table:"
        (lambda (table) (error "failing table")))
 
-      (Given "^a successful table:$"
+      (Given "a successful table:"
        (lambda (table) "table"))
 
-      (Given "^a failing py string:$"
+      (Given "a failing py string:"
        (lambda (py-string) (error "failing py string")))
 
-      (Given "^a successful py string:$"
+      (Given "a successful py string:"
        (lambda (py-string) "py-string"))
 
-      (Given "^success$"
+      (Given "success"
        (lambda () "success"))
       """
 

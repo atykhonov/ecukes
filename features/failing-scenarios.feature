@@ -27,7 +27,7 @@ Feature: Failing Scenarios
       """
     And step definition:
       """
-      (Given "^failure$"
+      (Given "failure"
        (lambda () (error "failure")))
       """
     When I run ecukes "features/foo.feature --reporter spec"
@@ -45,7 +45,7 @@ Feature: Failing Scenarios
       """
     Given step definition:
       """
-      (Given "^failure$"
+      (Given "failure"
        (lambda () ))
       """
     When I run ecukes "features/foo.feature --reporter spec -f"
@@ -70,7 +70,7 @@ Feature: Failing Scenarios
       """
     And step definition:
       """
-      (Given "^failure$"
+      (Given "failure"
        (lambda () (error "failure")))
       """
     When I run ecukes "features/foo.feature --reporter spec"
@@ -88,7 +88,7 @@ Feature: Failing Scenarios
       """
     Given step definition:
       """
-      (Given "^failure$"
+      (Given "failure"
        (lambda () ))
       """
     When I run ecukes "features/foo.feature --reporter spec -f"

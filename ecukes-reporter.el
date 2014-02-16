@@ -257,7 +257,7 @@ The rest of the arguments will be applied to `format'."
 (defun ecukes-reporter-print-table (step)
   "Print STEP table."
   (let* (widths
-         (table (ecukes-step-arg step))
+         (table (car (ecukes-step-args step)))
          (rows (length table))
          (cols (length (car table))))
     (-dotimes
@@ -286,7 +286,7 @@ The rest of the arguments will be applied to `format'."
 (defun ecukes-reporter-print-py-string (step)
   "Print STEP py-string."
   (ecukes-reporter-println 6 "\"\"\"")
-  (let ((lines (s-lines (ecukes-step-arg step))))
+  (let ((lines (s-lines (ecukes-step-args step))))
     (--each lines (ecukes-reporter-println 6 it)))
   (ecukes-reporter-println 6 "\"\"\""))
 
@@ -354,7 +354,7 @@ The rest of the arguments will be applied to `format'."
 (defun ecukes-reporter--step-args (step)
   "Return args from STEP."
   (let* (result
-         (arg (ecukes-step-arg step))
+         (arg (ecukes-step-args step))
          (args (ecukes-steps-args step))
          (type (ecukes-step-type step))
          (args-count
@@ -402,8 +402,8 @@ Include docstring when WITH-DOC is non-nil."
        (when with-file
          (let ((file (ecukes-step-file-name step-def t)))
            (setq row (s-concat row file ": "))))
-       (let ((regex (ecukes-step-def-regex step-def)))
-         (setq row (s-concat row (ansi-green regex))))
+       (let ((body (ecukes-step-def-body step-def)))
+         (setq row (s-concat row (ansi-green body))))
        (when with-doc
          (let ((doc (ecukes-step-def-doc step-def)))
            (when doc

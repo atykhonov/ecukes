@@ -9,7 +9,7 @@ Feature: Verbose
       """
     Given step definition:
       """
-      (When "^I princ hello world$"
+      (When "I princ hello world"
        (lambda () (princ "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec --verbose"
@@ -32,7 +32,7 @@ Feature: Verbose
       """
     Given step definition:
       """
-      (When "^I princ hello world$"
+      (When "I princ hello world"
        (lambda () (princ "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec"
@@ -55,7 +55,7 @@ Feature: Verbose
       """
     Given step definition:
       """
-      (When "^I princ hello world$"
+      (When "I princ hello world"
        (lambda () (princ "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec --quiet"
@@ -74,12 +74,12 @@ Feature: Verbose
       """
       Feature: Foo
         Scenario: Hello world
-          When I message hello world
+          When I message "hello world"
       """
     Given step definition:
       """
-      (When "^I message hello world$"
-       (lambda () (message "hello world")))
+      (When "I message :arg-1"
+       (lambda (arg-1) (message "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec --verbose"
     Then I should see command output:
@@ -87,7 +87,7 @@ Feature: Verbose
       hello world
       Feature: Foo
         Scenario: Hello world
-          When I message hello world
+          When I message "hello world"
 
       1 scenarios (0 failed, 1 passed)
       1 steps (0 failed, 0 skipped, 1 passed)
@@ -98,12 +98,12 @@ Feature: Verbose
       """
       Feature: Foo
         Scenario: Hello world
-          When I message hello world
+          When I message "hello world"
       """
     Given step definition:
       """
-      (When "^I message hello world$"
-       (lambda () (message "hello world")))
+      (When "I message :arg-1"
+       (lambda (arg-1) (message "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec"
     Then I should see command output:
@@ -111,7 +111,7 @@ Feature: Verbose
       hello world
       Feature: Foo
         Scenario: Hello world
-          When I message hello world
+          When I message "hello world"
 
       1 scenarios (0 failed, 1 passed)
       1 steps (0 failed, 0 skipped, 1 passed)
@@ -122,19 +122,19 @@ Feature: Verbose
       """
       Feature: Foo
         Scenario: Hello world
-          When I message hello world
+          When I message "hello world"
       """
     Given step definition:
       """
-      (When "^I message hello world$"
-       (lambda () (message "hello world")))
+      (When "I message :arg-1"
+       (lambda (arg-1) (message "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec"
     Then I should see command output:
       """
       Feature: Foo
         Scenario: Hello world
-          When I message hello world
+          When I message "hello world"
 
       1 scenarios (0 failed, 1 passed)
       1 steps (0 failed, 0 skipped, 1 passed)
