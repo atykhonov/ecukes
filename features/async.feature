@@ -11,10 +11,9 @@ Feature: Async
       """
     Given step definition:
       """
-      (Given "I sleep for :arg-1 second"
-        (lambda (seconds callback)
-          (sleep-for (string-to-number seconds))
-          (funcall callback)))
+      (define-step-async "I sleep for `seconds' second"
+        (sleep-for (string-to-number seconds))
+        (funcall callback))
       """
     When I run ecukes "features/async.feature --reporter dot"
     Then I should see command output:
@@ -34,9 +33,8 @@ Feature: Async
       """
     And step definition:
       """
-      (Given "I sleep for :arg-1 second"
-        (lambda (seconds callback)
-          (funcall callback)))
+      (define-step-async "I sleep for `seconds' second"
+        (funcall callback))
       """
     When I byte compile "features/step-definitions/super-project-steps.el"
     And I run ecukes "features/async.feature --reporter dot"
@@ -53,14 +51,13 @@ Feature: Async
       """
       Feature: Sleep for
         Scenario: Ten seconds
-          Given I sleep for '10 seconds
+          Given I sleep for '1 seconds
       """
     Given step definition:
       """
-      (Given "I sleep for :arg-1 seconds"
-        (lambda (seconds callback)
+      (define-step-async "I sleep for `seconds' seconds"
           ;; not callbacked
-          ))
+          )
       """
     When I run ecukes "features/async.feature --reporter dot --timeout 1"
     Then I should see command error:
@@ -68,7 +65,7 @@ Feature: Async
       .
 
         Scenario: Ten seconds
-          Given I sleep for '10 seconds
+          Given I sleep for '1 seconds
             Did not callback async step within 1 seconds
 
       1 scenarios (1 failed, 0 passed)

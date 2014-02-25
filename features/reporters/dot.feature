@@ -7,16 +7,16 @@ Feature: Dot
        (lambda () (error "failure")))
 
       (Given "a failing table:"
-       (lambda (table) (error "failing table")))
+       (lambda (pystring table) (error "failing table")))
 
       (Given "a successful table:"
-       (lambda (table) "table"))
+       (lambda (pystring table) "table"))
 
       (Given "a failing py string:"
-       (lambda (py-string) (error "failing py string")))
+       (lambda (pystring table) (error "failing py string")))
 
       (Given "a successful py string:"
-       (lambda (py-string) "py-string"))
+       (lambda (pystring table) "py-string"))
 
       (Given "success"
        (lambda () "success"))

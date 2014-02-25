@@ -50,7 +50,6 @@
     (let* ((tags)
            (intro (ecukes-parse-intro))
            (background (ecukes-parse-background))
-           ;; (test (message "Test POINT!!!"))
            (outlines (ecukes-parse-outlines))
            (scenarios (append (ecukes-parse-scenarios) (-mapcat 'ecukes-generate-outlined-scenarios outlines))))
       (goto-char (point-min))
@@ -148,7 +147,8 @@
          (table (ecukes-outline-table outline))
          (header (car table)))
     (-map (lambda (row)
-            (make-ecukes-scenario :name name :tags tags :steps (ecukes-substitute-in-steps steps (-interleave header row))))
+            (make-ecukes-scenario :name name :tags tags
+                                  :steps (ecukes-substitute-in-steps steps (-interleave header row))))
           (cdr table))))
 
 (defun ecukes-parse-scenarios ()
@@ -199,7 +199,8 @@
          (head (nth 1 matches))
          (body (nth 2 matches))
          (parsed-body)
-         (arg nil)
+         (pystring nil)
+         (table nil)
          (args '())
          (params)
          (type))
@@ -208,30 +209,26 @@
     (setq args (cadr parsed-body))
     (cond
      ((ecukes-parse-py-string-step-p)
-      (setq arg (ecukes-parse-py-string-step))
+      (setq pystring (ecukes-parse-py-string-step))
       (setq type 'py-string))
      ((ecukes-parse-table-step-p)
-      (setq arg (ecukes-parse-table-step))
+      (setq table (ecukes-parse-table-step))
       (setq type 'table))
      (t (setq type 'regular)))
-    (when arg
-      (setq args
-            (nconc args `(,arg))))
-    (make-ecukes-step :name name :head head :body body 
-                      :type type :args args)))
+    (make-ecukes-step :name name :head head :body body :type type
+                      :args args :pystring pystring :table table)))
 
 (defun ecukes-char-at-point ()
   (buffer-substring-no-properties (point) (+ (point) 1)))
 
-;; TODO: rename it as it can take colon not only quotes
-(defun ecukes-parse-body-find-unescaped-quote (quote)
+(defun ecukes-parse-body-find-unescaped-char (char)
   (let ((quote-point nil)
         (continue t)
         (continue-looking t)
         (escaped-quote nil))
     (while (and continue
                 (setq quote-point
-                      (search-forward quote (point-max) t)))
+                      (search-forward char (point-max) t)))
       (setq escaped-quote nil)
       (when (> (point) 2)
         (backward-char 2)
@@ -252,13 +249,13 @@
       (- quote-point 1))))
 
 (defun ecukes-parse-body-next-unescaped-single-quote ()
-  (ecukes-parse-body-find-unescaped-quote "'"))
+  (ecukes-parse-body-find-unescaped-char "'"))
 
 (defun ecukes-parse-body-next-unescaped-double-quote ()
-  (ecukes-parse-body-find-unescaped-quote "\""))
+  (ecukes-parse-body-find-unescaped-char "\""))
 
-(defun ecukes-parse-body-next-unescaped-colon ()
-  (ecukes-parse-body-find-unescaped-quote ":"))
+(defun ecukes-parse-body-next-unescaped-backtick ()
+  (ecukes-parse-body-find-unescaped-char "`"))
 
 (defun ecukes-parse-body-next-unescaped-quote ()
   (let ((curr-point (point))
@@ -313,16 +310,14 @@
                            (+ (point) 1)))
                     (with-temp-buffer
                       (setq evaled-expression
-                            ;; (eval-expression
-                             (read symbol-content)))
-                    ;; (add-to-list 'parameters
-                    ;;              evaled-expression)
+                            (read symbol-content)))
                     (setq parameters
                           (nconc parameters `(,evaled-expression)))
                     (goto-char quote-point)
                     (delete-forward-char (+ (length symbol-content) 1))
-                    (insert (format ":arg-%s" (incf arg-num))))
-                (let ((char (backward-char))
+                    (insert (format "`arg-%s'" (incf arg-num))))
+                (let ((symbol-value nil)
+                      (char (backward-char))
                       (symbol-end-point
                        (search-forward " " (point-max) t)))
                   (if (null symbol-end-point)
@@ -334,14 +329,17 @@
                         (buffer-substring-no-properties
                          quote-point
                          symbol-end-point))
-                  ;; (add-to-list 'parameters
-                  ;;              (substring symbol-content 1) t)
+                  (setq symbol-value
+                        (substring symbol-content 1))
+                  (when (equal symbol-value "nil")
+                    (setq symbol-value nil))
+                  (when (equal symbol-value "t")
+                    (setq symbol-value t))
                   (setq parameters
-                        (nconc parameters `(,(substring symbol-content 1))))
-
+                        (nconc parameters `(,symbol-value)))
                   (goto-char quote-point)
                   (delete-forward-char (length symbol-content))
-                  (insert (format ":arg-%s" (incf arg-num))))))
+                  (insert (format "`arg-%s'" (incf arg-num))))))
           (when (equal (ecukes-char-at-point) "\"")
             (let ((start-dbl-quote quote-point)
                   (end-dbl-quote nil)
@@ -353,15 +351,11 @@
                     (buffer-substring-no-properties
                      start-dbl-quote
                      end-dbl-quote))
-              ;; (add-to-list 'parameters
-              ;;              (substring string-content 1)
-              ;;              t)
               (setq parameters
                     (nconc parameters `(,(substring string-content 1))))
-
               (goto-char start-dbl-quote)
               (delete-forward-char (+ (length string-content) 1))
-              (insert (format ":arg-%s" (incf arg-num)))))))
+              (insert (format "`arg-%s'" (incf arg-num)))))))
       (list (buffer-string) parameters))))
 
 (defun ecukes-parse-table-step-p ()

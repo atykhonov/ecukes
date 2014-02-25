@@ -1,4 +1,3 @@
-({{head}} "{{body}}"
-  (lambda ({{args}})
-
-    ))
+(define-step "{{body}}"
+  ;; ...
+  )

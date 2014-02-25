@@ -193,18 +193,18 @@
     (condition-case err
         (let* ((body (ecukes-step-body step))
                (args (ecukes-step-args step))
+               (pystring (ecukes-step-pystring step))
+               (table (ecukes-step-table step))
                (step-def (ecukes-steps-find body))
                (fn (ecukes-step-def-fn step-def))
-               (fn-args-count
-                (if (byte-code-function-p fn)
-                    (car (byte-compile-arglist-signature (aref fn 0)))
-                  (length
-                   (if (listp fn)
-                       (cond ((eq (car fn) 'lambda)
-                              (cadr fn))
-                             ((eq (car fn) 'closure)
-                              (nth 2 fn))))))))
-          (if (and (not (symbolp fn)) (> fn-args-count (length args)))
+               (async (ecukes-step-def-async step-def)))
+          (when pystring
+            (setq args
+                  (nconc args `(,pystring nil))))
+          (when table
+            (setq args
+                  (nconc args `(nil ,table))))
+          (if async
               (progn
                 (let ((wait t))
                   (add-to-list 'args (lambda (&rest args) (setq wait nil)) t)

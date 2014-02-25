@@ -10,16 +10,16 @@ Feature: Magnars
        (lambda () (error "huge\nfailure")))
 
       (Given "a failing table:"
-       (lambda (table) (error "failing table")))
+       (lambda (pystring table) (error "failing table")))
 
       (Given "a successful table:"
-       (lambda (table) ))
+       (lambda (pystring table) ))
 
       (Given "a failing py string:"
-       (lambda (py-string) (error "failing py string")))
+       (lambda (pystring table) (error "failing py string")))
 
       (Given "a successful py string:"
-       (lambda (py-string) ))
+       (lambda (pystring table) ))
 
       (Given "success"
        (lambda ()))

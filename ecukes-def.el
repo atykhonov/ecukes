@@ -27,11 +27,11 @@ optional, but is conventionally included."
 
 (defstruct ecukes-step
   "A step is some kind of action."
-  name head body args type err status)
+  name head body args type err status pystring table)
 
 (defstruct ecukes-step-def
   "A step definition."
-  body fn doc file)
+  body fn doc file args async)
 
 (defun ecukes-step-file-name (step &optional relative)
   "Return the file in which STEP is defined.

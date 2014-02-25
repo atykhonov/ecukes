@@ -78,7 +78,7 @@ Feature: Verbose
       """
     Given step definition:
       """
-      (When "I message :arg-1"
+      (When "I message `arg-1'"
        (lambda (arg-1) (message "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec --verbose"
@@ -102,7 +102,7 @@ Feature: Verbose
       """
     Given step definition:
       """
-      (When "I message :arg-1"
+      (When "I message `arg-1'"
        (lambda (arg-1) (message "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec"
@@ -126,7 +126,7 @@ Feature: Verbose
       """
     Given step definition:
       """
-      (When "I message :arg-1"
+      (When "I message `arg-1'"
        (lambda (arg-1) (message "hello world")))
       """
     When I run ecukes "features/foo.feature --reporter spec"

@@ -809,7 +809,8 @@
          (make-ecukes-step-def
           :fn
           (lambda (callback)
-            (funcall callback))))
+            (funcall callback))
+          :async t))
    (should (ecukes-run-step (make-ecukes-step)))))
 
 (ert-deftest ecukes-run-test/run-step-async-callbacked-with-args ()
@@ -819,7 +820,8 @@
           :fn
           (lambda (arg-1 callback)
             (should (eq arg-1 'arg-1))
-            (funcall callback))))
+            (funcall callback))
+          :async t))
    (should (ecukes-run-step (make-ecukes-step :args '(arg-1))))))
 
 (ert-deftest ecukes-run-test/run-step-async-with-timeout ()
@@ -830,7 +832,8 @@
           :fn
           (lambda (callback)
             ;; not callbacked
-            )))
+            )
+          :async t))
    (let ((step (make-ecukes-step)))
      (should-not
       (ecukes-run-step step))
@@ -846,7 +849,8 @@
           :fn
           (byte-compile
            (lambda (callback)
-             (funcall callback)))))
+             (funcall callback)))
+          :async t))
    (should (ecukes-run-step (make-ecukes-step)))))
 
 (ert-deftest ecukes-run-test/pending-hook ()

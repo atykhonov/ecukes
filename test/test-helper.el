@@ -37,8 +37,10 @@
          (head (ecukes-step-head step))
          (body (ecukes-step-body step))
          (type (ecukes-step-type step))
-         (args (ecukes-step-args step)))
-    (funcall fn name head body type args)))
+         (args (ecukes-step-args step))
+         (pystring (ecukes-step-pystring step))
+         (table (ecukes-step-table step)))
+    (funcall fn name head body type args pystring table)))
 
 (defun with-parse-scenario (name fn)
   (let* ((feature-file (fixture-file-path "scenario" name))

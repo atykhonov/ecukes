@@ -9,6 +9,34 @@
 (defvar ecukes-steps-definitions nil
   "All defined step definitions.")
 
+;;;###autoload
+(defmacro define-step (step &optional docstring &rest body)
+  `(define--step ,step nil ,docstring ,@body))
+
+;;;###autoload
+(defmacro define-step-async (step &optional docstring &rest body)
+  `(define--step ,step t ,docstring ,@body))
+
+(defmacro define--step (step async &optional docstring &rest body)
+  (declare (doc-string 2) (indent defun))
+
+  (if docstring (setq body (cons docstring body))
+    (if (null body) (setq body '(nil))))
+
+  (let ((arguments (ecukes-steps-body-arguments step))
+        (params (list)))
+    (when async
+      (add-to-list 'arguments "callback" t))
+    (dolist (arg arguments)
+      (when (equal arg "pystring")
+        (setq params
+              (add-to-list 'params '&optional t)))
+      (setq params
+            (nconc params `(,(intern arg)))))
+    `(ecukes-steps-define
+      ,step
+      (lambda (,@params) ,@body)
+      ,nil nil ,async)))
 
 ;;;###autoload
 (defalias 'Given 'ecukes-steps-define-or-call-step
@@ -57,14 +85,64 @@ When *calling* a step, argument takes the following form:
 ;;;###autoload
 (put 'ecukes-steps-define-or-call-step 'doc-string-elt 2)
 
-(defun ecukes-steps-define (body fn &optional doc file)
+(defun ecukes-steps-define (body fn &optional doc file async)
   "Define step."
-  (unless (-any?
-           (lambda (step-def)
-             (equal body step-def)) ecukes-steps-definitions)
-    (add-to-list
-     'ecukes-steps-definitions
-     (make-ecukes-step-def :body body :fn fn :doc doc :file file))))
+  (let ((body (ecukes-steps-format-body body))
+        (arguments (ecukes-steps-body-arguments body)))
+    (unless (-any?
+             (lambda (step-def)
+               (equal body step-def)) ecukes-steps-definitions)
+      (add-to-list
+       'ecukes-steps-definitions
+       (make-ecukes-step-def :body body :fn fn :doc doc :file file
+                             :args arguments :async async)))))
+
+(defun ecukes-steps-body-arguments (body)
+  "Retrieve argument names from BODY."
+  (let ((continue t)
+        (curr-point nil)
+        (colon-point nil)
+        (arg-num 0)
+        (arg-names (list)))
+    (with-temp-buffer
+      (insert body)
+      (goto-char (point-min))
+      (setq curr-point (point))
+      (while (setq colon-point
+                   (ecukes-parse-body-next-unescaped-backtick))
+        (goto-char colon-point)
+        (let ((colon-end-point
+               (search-forward "'" (point-max) t)))
+          (goto-char (+ colon-point 1))
+          (setq arg-names
+                (nconc arg-names
+                       `(,(buffer-substring-no-properties
+                           (point)
+                           (- colon-end-point 1)))))))
+      (when (equal (substring body -1) ":")
+        (setq arg-names
+              (nconc arg-names (list "pystring" "table"))))
+      arg-names)))
+
+(defun ecukes-steps-format-body (body)
+  "Format body."
+  (let ((continue t)
+        (curr-point nil)
+        (colon-point nil)
+        (arg-num 0))
+    (with-temp-buffer
+      (insert body)
+      (goto-char (point-min))
+      (setq curr-point (point))
+      (while (setq colon-point
+                   (ecukes-parse-body-next-unescaped-backtick))
+        (goto-char colon-point)
+        (let ((colon-end-point
+               (search-forward "'" (point-max) t)))
+          (goto-char colon-point)
+          (delete-forward-char (- colon-end-point colon-point))
+          (insert (format "`arg-%s'" (incf arg-num)))))
+      (buffer-string))))
 
 (defun ecukes-steps-format-step (body args)
   "Format step."
@@ -76,36 +154,34 @@ When *calling* a step, argument takes the following form:
       (goto-char (point-min))
       (setq curr-point (point))
       (while (setq colon-point
-                   (ecukes-parse-body-next-unescaped-colon))
+                   (ecukes-parse-body-next-unescaped-backtick))
         (goto-char colon-point)
         (let ((colon-end-point
-               (search-forward " " (point-max) t)))
-          (if (null colon-end-point)
-              (setq colon-end-point
-                    (point-max))
-            (setq colon-end-point
-                  (- colon-end-point 1)))
+               (search-forward "'" nil t)))
           (goto-char colon-point)
           (delete-forward-char (- colon-end-point colon-point))
-          (insert "\"" (car args) "\"")
+          (insert (format "\"%s\"" (car args)))
           (setq args (cdr args))))
       (buffer-string))))
 
 (defun ecukes-steps-call (body args)
   "Call step."
-  (let* ((parsed-body (ecukes-parse-body body))
-         (args (if (equal body (car parsed-body))
-                   args
-                 (cadr parsed-body)))
-         (body (car parsed-body))
-         (query (apply 'format (cons body args)))
-         (step-def (ecukes-steps-find query)))
+  (let* ((parsed-body nil)
+         (step-def nil)
+         (body body))
+    (if (equal args '())
+        (progn
+          (setq parsed-body (ecukes-parse-body body))
+          (setq body (car parsed-body))
+          (setq args (cadr parsed-body)))
+      (setq body (ecukes-steps-format-body body)))
+    (setq step-def (ecukes-steps-find body))
     (if step-def
         (apply (ecukes-step-def-fn step-def)
                (or args
                    (ecukes-steps-args
                     (make-ecukes-step :body body))))
-      (error (ansi-red "Step not defined: `%s`" query)))))
+      (error (ansi-red "Step not defined: `%s`" body)))))
 
 (defun ecukes-steps-without-definition (steps)
   "Return from STEPS those who have not been defined."

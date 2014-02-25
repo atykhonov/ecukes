@@ -257,7 +257,7 @@ The rest of the arguments will be applied to `format'."
 (defun ecukes-reporter-print-table (step)
   "Print STEP table."
   (let* (widths
-         (table (car (ecukes-step-args step)))
+         (table (ecukes-step-table step))
          (rows (length table))
          (cols (length (car table))))
     (-dotimes
@@ -286,7 +286,7 @@ The rest of the arguments will be applied to `format'."
 (defun ecukes-reporter-print-py-string (step)
   "Print STEP py-string."
   (ecukes-reporter-println 6 "\"\"\"")
-  (let ((lines (s-lines (ecukes-step-args step))))
+  (let ((lines (s-lines (ecukes-step-pystring step))))
     (--each lines (ecukes-reporter-println 6 it)))
   (ecukes-reporter-println 6 "\"\"\""))
 

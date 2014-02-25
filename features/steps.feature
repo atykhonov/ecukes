@@ -13,10 +13,9 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "a missing step"
-        (lambda ()
-
-          ))
+      (define-step "a missing step"
+        ;; ...
+        )
       """
 
   Scenario: Missing steps
@@ -35,15 +34,13 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "a missing step"
-        (lambda ()
+      (define-step "a missing step"
+        ;; ...
+        )
 
-          ))
-
-      (Given "another missing step"
-        (lambda ()
-
-          ))
+      (define-step "another missing step"
+        ;; ...
+        )
       """
 
   Scenario: Missing step with argument
@@ -59,10 +56,9 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "some :arg-1"
-        (lambda (arg)
-
-          ))
+      (define-step "some `arg-1'"
+        ;; ...
+        )
       """
 
   Scenario: Missing step with arguments
@@ -78,8 +74,7 @@ Feature: Steps
       """
       Please implement the following step definitions
 
-      (Given "some :arg-1 and some :arg-2"
-        (lambda (arg-1 arg-2)
-
-          ))
+      (define-step "some `arg-1' and some `arg-2'"
+        ;; ...
+        )
       """
